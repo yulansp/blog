@@ -18,9 +18,11 @@ def init():
     app = web.Application()
     app.add_routes(routes)
     host = '127.0.0.1'
-    port = 5000
+    port = 8000
     web.run_app(app,host=host,port = port)
-    print('======== Running on http://127.0.0.1:%s ========' % host)
+    print('======== Running on http://%s:%s ========' % (host,port))
 
 if __name__ == '__main__':
-    init()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(init())
+    loop.run_forever()
