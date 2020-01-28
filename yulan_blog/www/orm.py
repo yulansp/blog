@@ -18,7 +18,7 @@ async def create_pool(loop, **kwargs):
                                         autocommit=kwargs.get('autocommit', True),
                                         maxsize=kwargs.get('maxsize', 10),
                                         minsize=kwargs.get('minsize', 1),
-                                        # loop=loop
+                                        loop=loop
                                         )
 
 
@@ -57,7 +57,7 @@ async def execute(sql, args, autocommit=True):
         rs = cur.rowcount
         if rs:
             return rs
-        else :
+        else:
             return -1
 
 
@@ -151,11 +151,11 @@ class ModelMeatclass(type):
         attrs['__fields__'] = fields
         attrs['__select__'] = 'SELECT `%s`,%s FROM `%s`' % (primekey, ','.join(escaped_fields), tablename)
         attrs['__insert__'] = 'INSERT INTO `%s` (`%s`,%s) VALUES (%s)' % (
-        tablename, primekey, ','.join(escaped_fields), creatr_args_string(len(escaped_fields) + 1))
+            tablename, primekey, ','.join(escaped_fields), creatr_args_string(len(escaped_fields) + 1))
         attrs['__delete__'] = 'DELETE FROM `%s` WHERE `%s` = ?' % (tablename, primekey)
         attrs['__update__'] = 'UPDATE `%s` set %s where `%s`=?' % (
-        tablename, ', '.join(map(lambda f: '`%s`=?' % f, fields)),
-        primekey)
+            tablename, ', '.join(map(lambda f: '`%s`=?' % f, fields)),
+            primekey)
         return type.__new__(cls, name, bases, attrs)
 
 
@@ -241,6 +241,38 @@ class Model(dict, metaclass=ModelMeatclass):
         if len(rs) == 0:
             return None
         return cls(**rs[0])
+
+    # 使用聚合查询如count(*)
+    @classmethod
+    async def FindNumber(cls, selectField, where=None, args=None):
+        sql = ['select %s _num_ from `%s`' % (selectField, cls.__table__)]
+        countwhere = 0
+        if where:
+            sql.append('where')
+            if isinstance(where, str):
+                sql.append(where)
+                sql.append('= ?')
+                countwhere = 1
+            if isinstance(where, tuple):
+                where = list(where)
+                countwhere = len(where)
+                for index, s in enumerate(where):
+                    where[index] = s + ' = ?'
+                sql.append(' and '.join(where))
+
+        if args is None:
+            args = []
+        if isinstance(args, str):
+            args = [args]
+        if isinstance(args, tuple):
+            args = list(args)
+
+        if countwhere != len(args):
+            raise ValueError('Need %s args but receive %s' % (countwhere, len(args)))
+        rs = await select(' '.join(sql), args, 1)
+        if len(rs) == 0:
+            return None
+        return rs[0]['_num_']
 
     # INSERT command
     async def insert(self):

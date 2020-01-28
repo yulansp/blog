@@ -25,98 +25,73 @@ class User(Model):
     created_at = FloatField(default=time.time)
    ```
 
-### 查找select
+### 初始连接数据库，创建连接池
 ```python
-async def test(loop):
-    await orm.create_pool(loop = loop,user='...', password='...', db='...')
-    u =await User.FindAll(where = 'name',args = 'Test')
-    print(u)
+async def link_db(loop):
+    await orm.create_pool(loop=loop, user='...', password='...', db='...')
 
 loop = asyncio.get_event_loop()
-loop.run_until_complete(test(loop))
+loop.run_until_complete(link_db(loop))
 loop.run_forever()
+```
+
+### 查找select
+```python
+u =await User.FindAll(where = 'name',args = 'Test')
+print(u)
+#u是一个[{},{}]
 ```
 or
 ```python
-async def test(loop):
-    await orm.create_pool(loop = loop,user='...', password='...', db='...')
-    u =await User.FindAll(where = ('name','image'),args = ('Test','about:blank'))
-    print(u)
+u =await User.FindAll(where = ('name','image'),args = ('Test','about:blank'))
+print(u)
+#u是一个[{},{}]
+```
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(test(loop))
-loop.run_forever()
+### 查询数目
+```python
+num = await User.FindNumber('count(*)')
+print(num)
+#num是int
 ```
 
 ### 插入表INSERT
 ```python
-async def test(loop):
-    await orm.create_pool(loop = loop,user='...', password='...', db='...')
-
-    u = User(name='Test', email='test@example.com', passwd='1234567890', image='about:blank')
-
-    await u.insert()
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(test(loop))
-loop.run_forever()
+u = User(name='Test', email='test@example.com', passwd='1234567890', image='about:blank')
+await u.insert()
 ```
 
 ### 删除DELETE
 ```python
-async def test(loop):
-    await orm.create_pool(loop = loop,user='...', password='...', db='...')
-    id = '001580039117160dfdf31cf27ea4aa497d82f10ad55b8dd000'
-    u =await User().Find(id)
-    await u.delete()
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(test(loop))
-loop.run_forever()
+id = '001580039117160dfdf31cf27ea4aa497d82f10ad55b8dd000'
+u =await User().Find(id)
+await u.delete()
 ```
 
 or
 ```python
-async def test(loop):
-    await orm.create_pool(loop = loop,user='...', password='...', db='...')
-    users =await User.FindAll(where = 'name',args = 'Test')
-    if len(users) == 1:
-        u = users[0]
-    else:
-        raise RuntimeError('find %s users' % len(users))
-    await u.delete()
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(test(loop))
-loop.run_forever()
+users =await User.FindAll(where = 'name',args = 'Test')
+if len(users) == 1:
+    u = users[0]
+else:
+    raise RuntimeError('find %s users' % len(users))
+await u.delete()
 ```
 
 ### 更新UPDATE
 ```python
-async def test(loop):
-    await orm.create_pool(loop = loop,user='...', password='...', db='...')
-    id = '001580039117160dfdf31cf27ea4aa497d82f10ad55b8dd000'
-    u =await User().Find(id)
-    u['passwd'] = '11111'
-    await u.update()
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(test(loop))
-loop.run_forever()
+id = '001580039117160dfdf31cf27ea4aa497d82f10ad55b8dd000'
+u =await User().Find(id)
+u['passwd'] = '11111'
+await u.update()
 ```
 or
 ```python
-async def test(loop):
-    await orm.create_pool(loop = loop,user='...', password='...', db='...')
-    users =await User.FindAll(where = 'name',args = 'Test')
-    if len(users) == 1:
-        u = users[0]
-    else:
-        raise RuntimeError('find %s users' % len(users))
-    u['passwd'] = '22222'
-    await u.update()
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(test(loop))
-loop.run_forever()
+users =await User.FindAll(where = 'name',args = 'Test')
+if len(users) == 1:
+    u = users[0]
+else:
+    raise RuntimeError('find %s users' % len(users))
+u['passwd'] = '22222'
+await u.update()
 ```

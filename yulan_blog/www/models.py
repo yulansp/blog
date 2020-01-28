@@ -1,5 +1,5 @@
 import time, uuid
-from orm import Model, StringField, BoolField, FloatField, TextField
+from orm import Model, StringField, BoolField, FloatField, TextField,IntegerField
 import orm
 import asyncio
 
@@ -30,6 +30,8 @@ class Blog(Model):
     content = TextField()
     created_at = FloatField(default=time.time)
     revised_at = FloatField(default=time.time)
+    page_view = IntegerField()
+    classfication = StringField(column_type = 'varchar(20)')
 
 class Comment(Model):
     __table__ = 'comments'
