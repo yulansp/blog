@@ -1,8 +1,6 @@
 import asyncio
 from aiohttp import web
-import logging, os, json, time;
-
-logging.basicConfig(level=logging.INFO)
+import logging, os, json, time;logging.basicConfig(level=logging.INFO)
 from time import strftime
 import orm
 from jinja2 import Environment, FileSystemLoader
@@ -10,6 +8,8 @@ import inspect
 from urllib import parse
 import functools
 from config import configs
+
+
 
 
 def get_required_keyword(fn):
@@ -112,32 +112,28 @@ class RequestHanlder(object):
         return r
 
 
-routes = web.RouteTableDef()
+routes = []
 
 
 def get(path):
     def decorator(fun):
-        @routes.get(path)
+        fn = RequestHanlder(fun)
+        routes.append(web.get(path, fn))
         @functools.wraps(fun)
-        def wraps(request, *args, **kwargs):
-            fn = RequestHanlder(fun)
+        def wraps(request):
             return fn(request)
-
         return wraps
-
     return decorator
 
 
 def post(path):
     def decorator(fun):
-        @routes.post(path)
+        fn = RequestHanlder(fun)
+        routes.append(web.post(path, fn))
         @functools.wraps(fun)
-        def wraps(request, *args, **kwargs):
-            fn = RequestHanlder(fun)
+        def wraps(request):
             return fn(request)
-
         return wraps
-
     return decorator
 
 
@@ -162,7 +158,6 @@ async def res_middleware(request, handler):
                                 content_type='application/json', charset='utf-8')
             return resp
         else:
-            # global __templating
             resp = web.Response(body=request.app['__templating__'].get_template(template).render(**r).encode('utf-8'),
                                 content_type='text/html', charset='utf-8')
             return resp
@@ -228,3 +223,4 @@ def init():
     loop = asyncio.get_event_loop()
     loop.run_until_complete(link_db(loop))
     runapp()
+

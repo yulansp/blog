@@ -9,5 +9,9 @@ async def index():
         'users':u
     }
 
+@get('/hello/{name}')
+def hello(name):
+    return str(name)
+
 if __name__ == '__main__':
     init()
