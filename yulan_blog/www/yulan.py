@@ -1,6 +1,6 @@
 import asyncio
 from aiohttp import web
-import logging, os, json, time;logging.basicConfig(level=logging.INFO)
+import logging, os, time;logging.basicConfig(level=logging.INFO)
 from time import strftime
 import orm
 from jinja2 import Environment, FileSystemLoader
@@ -8,6 +8,8 @@ import inspect
 from urllib import parse
 import functools
 from config import configs
+from apis import APIError
+from middleware import middlewares
 
 
 
@@ -102,14 +104,15 @@ class RequestHanlder(object):
         if self._required_keyword:
             for name in self._required_keyword:
                 if not name in kw:
-                    return web.HTTPBadRequest('Missing argument: %s' % name)
-        logging.info('call with args: %s' % str(kw))
+                    return web.HTTPBadRequest(text='Missing argument: %s'%name)
 
         if not asyncio.iscoroutinefunction(self._fn):
             self._fn = asyncio.coroutine(self._fn)
-
-        r = await self._fn(**kw)
-        return r
+        try :
+            r = await self._fn(**kw)
+            return r
+        except APIError as e:
+            return dict(error=e.error, data=e.data, message=e.message)
 
 
 routes = []
@@ -137,39 +140,7 @@ def post(path):
     return decorator
 
 
-# 返回中间件，处理返回值
-@web.middleware
-async def res_middleware(request, handler):
-    r = await handler(request)
-    if isinstance(r, web.StreamResponse):
-        return r
-    if isinstance(r, bytes):
-        resp = web.Response(body=r, content_type='application/octet-stream')
-        return resp
-    if isinstance(r, str):
-        if r.startswith('redirect:'):
-            return web.HTTPFound(r[9:])
-        resp = web.Response(body=r.encode('utf-8'), content_type='text/html', charset='utf-8')
-        return resp
-    if isinstance(r, dict):
-        template = r.get('__template__')
-        if template is None:
-            resp = web.Response(body=json.dumps(r, ensure_ascii=False, default=lambda o: o.__dict__).encode('utf-8'),
-                                content_type='application/json', charset='utf-8')
-            return resp
-        else:
-            resp = web.Response(body=request.app['__templating__'].get_template(template).render(**r).encode('utf-8'),
-                                content_type='text/html', charset='utf-8')
-            return resp
-    if isinstance(r, int) and r >= 100 and r < 600:
-        return web.Response(r)
-    if isinstance(r, tuple) and len(r) == 2:
-        t, m = r
-        if isinstance(t, int) and t >= 100 and t < 600:
-            return web.Response(t, str(m))
-        # default:
-    resp = web.Response(body=str(r).encode('utf-8'), content_type='text/html', charset='utf-8')
-    return resp
+
 
 
 def add_static(app):
@@ -205,7 +176,7 @@ def datetime_filter(t):
 
 
 def runapp():
-    app = web.Application(middlewares=[res_middleware])
+    app = web.Application(middlewares=middlewares)
     app.add_routes(routes)
     add_static(app)
     init_jinja2(app, filters=dict(datetime=datetime_filter))
@@ -217,7 +188,6 @@ def runapp():
 
 async def link_db(loop):
     await orm.create_pool(loop=loop, **configs['db'])
-
 
 def init():
     loop = asyncio.get_event_loop()

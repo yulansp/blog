@@ -82,7 +82,7 @@ await u.delete()
 ```python
 id = '001580039117160dfdf31cf27ea4aa497d82f10ad55b8dd000'
 u =await User().Find(id)
-u['passwd'] = '11111'
+u.passwd = '11111'
 await u.update()
 ```
 or
@@ -92,6 +92,6 @@ if len(users) == 1:
     u = users[0]
 else:
     raise RuntimeError('find %s users' % len(users))
-u['passwd'] = '22222'
+u.passwd = '22222'
 await u.update()
 ```

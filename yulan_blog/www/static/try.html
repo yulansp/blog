@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>yulan_admin</title>
+    <link rel="stylesheet" href="../static/index.css">
+    <script src="../static/vue.js"></script>
+    <script src="../static/index.js"></script>
+    <script src="../static/axios.min.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <el-container style="top: 0;right: 0;margin-top: 0;">
+            <el-header style="box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);background-color: #dcdfe6;"><h1 style="color: #d93896;">欢迎回家</h1></el-header>
+            <el-container>
+                <el-aside width="20%">
+                    <el-menu default-active="2" style="height: 540px;">                  
+                        <el-menu-item index="1">
+                            <el-link href='/'>回到主页</el-link>
+                        </el-menu-item>
+                        <el-menu-item index="2">文章管理</el-menu-item>
+                        <el-menu-item index="3">评论管理</el-menu-item>
+                        <el-menu-item index="4"><el-link href="/edit">写文章</el-link></el-menu-item>
+                    </el-menu>
+                </el-aside>
+                <el-main style="background-color: white;"><h1>这是页面</h1></el-main>
+            </el-container>
+            
+        </el-container>
+    </div>
+</body>
+
+<script>
+    new Vue().$mount('#app')
+</script>
+</html>

@@ -28,6 +28,7 @@ class Blog(Model):
     name = StringField(column_type='varchar(50)')
     summary = StringField(column_type='varchar(200)')
     content = TextField()
+    content_html = TextField()
     created_at = FloatField(default=time.time)
     revised_at = FloatField(default=time.time)
     page_view = IntegerField()
@@ -35,11 +36,12 @@ class Blog(Model):
 
 class Comment(Model):
     __table__ = 'comments'
-
     id = StringField(prime_key=True, default=next_id, column_type='varchar(50)')
     blog_id = StringField(column_type='varchar(50)')
     user_id = StringField(column_type='varchar(50)')
     user_name = StringField(column_type='varchar(50)')
-    user_image = StringField(column_type='varchar(500)')
+    reply_to = StringField(column_type='varchar(50)')
+    parent_id = StringField(column_type='varchar(50)')
     content = TextField()
     created_at = FloatField(default=time.time)
+    blog_name = StringField(column_type='varchar(50)')

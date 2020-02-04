@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+
+    {% block meta %}
+    {% endblock %}
+    <title>{% block title %}语阑{% endblock %} - 语阑个人博客</title>
+    <link rel="stylesheet" href="../static/index.css">
+    <script src="../static/vue.js"></script>
+    <script src="../static/index.js"></script>
+    <script src="../static/axios.min.js"></script>
+    {% block beforehead %}
+    {% endblock %}
+
+    <style>
+        .el-menu-item .el-link {
+            font-size: 18px;
+        }
+
+        #poetry {
+            font-family: STKaiti;
+            background-color: white;
+        }
+
+        #poetry p {
+            font-size: 19px;
+        }
+
+        #poetry h1 {
+            font-size: 28px;
+        }
+
+        #poetry h2 {
+            font-size: 28px;
+        }
+
+        #poetry h3 {
+            font-size: 16px;
+        }
+
+        #poetry h4 {
+            font-size: 16px;
+        }
+    </style>
+
+</head>
+
+<body style="background-color: #f9f9f9;">
+    <el-container id="nav_bar" style="position: fixed;background-color: white;
+    width: 100%;top:0;left: 0;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);z-index: 9990;">
+        <el-backtop>
+            <div
+                style="height: 100%;width: 100%;background-color: #f2f5f6;box-shadow: 0 0 6px rgba(0,0,0, .12);text-align: center;line-height: 40px;color: #1989fa;">
+                UP</div>
+        </el-backtop>
+        <el-aside width="10%"><a href="/"><img src="../static/imgs/头像.png" width="50px" height="50px"
+                    style="position: absolute;left: 5%;top: 3px;"></a></el-aside>
+        <el-container style="width: 60%;">
+            <el-header style="align-self: center;width: 70%;">
+                <el-menu class="el-menu-demo" mode="horizontal" text-color="#000000" active-text-color="#d93896"
+                    :default-active="activeIndex">
+                    <el-menu-item index="main">
+                        <el-link href="/">首页</el-link>
+                    </el-menu-item>
+                    <el-menu-item index="skill">
+                        <el-link href="/skill">技术</el-link>
+                    </el-menu-item>
+                    <el-menu-item index="read">
+                        <el-link href="/read">读书</el-link>
+                    </el-menu-item>
+                    <el-menu-item index="something">
+                        <el-link href="/something">杂谈</el-link>
+                    </el-menu-item>
+                    <el-menu-item index="about">
+                        <el-link href="/about">关于</el-link>
+                    </el-menu-item>
+                </el-menu>
+            </el-header>
+        </el-container>
+        <el-container style="width: 20%;align-self: center;" id="user">
+            {% if user %}
+            <el-dropdown style="z-index: 9999;">
+                <el-button type="primary" icon="el-icon-user-solid">{{ user.name }}
+                </el-button>
+                <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item>
+                        <el-link href="/api/signout">登出</el-link>
+                    </el-dropdown-item>
+                    {% if user.admin %}
+                    <el-dropdown-item>
+                        <el-link href="/admin">后台管理</el-link>
+                    </el-dropdown-item>
+                    {% endif %}
+                </el-dropdown-menu>
+            </el-dropdown>
+            {% else %}
+            <el-button type="primary" @click="signinVisible = true">登录<i class="el-icon-arrow-down el-icon--right"></i>
+            </el-button>
+
+            <el-button type="primary" @click="signupVisible = true">注册<i class="el-icon-arrow-down el-icon--right"></i>
+            </el-button>
+
+            <el-dialog title="注册" :visible.sync="signupVisible" width="40%">
+                <el-form :model="siup" :rules="siuprules" ref="siup">
+                    <el-form-item label="昵称" :label-width="formLabelWidth" prop="name">
+                        <el-input v-model="siup.name" autocomplete="off" placeholder="请输入昵称"></el-input>
+                    </el-form-item>
+                    <el-form-item label="邮箱" :label-width="formLabelWidth" prop="mail" :rules="[
+                    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+                    { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
+                  ]">
+                        <el-input v-model="siup.mail" autocomplete="off" placeholder="请输入邮箱"></el-input>
+                    </el-form-item>
+                    <el-form-item label="密码" prop="passwd" :label-width="formLabelWidth">
+                        <el-input v-model="siup.passwd" autocomplete="off" placeholder="请输入密码" show-password>
+                        </el-input>
+                    </el-form-item>
+                    <el-form-item label="确认密码" :label-width="formLabelWidth" prop="checkpasswd">
+                        <el-input show-password v-model="siup.checkpasswd" autocomplete="off" placeholder="请确认密码">
+                        </el-input>
+                    </el-form-item>
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="signupVisible = false">取 消</el-button>
+                    <el-button native-type="submit" type="primary" @click="submitSignup('siup')" v-loading="loading">确 定
+                    </el-button>
+                </div>
+            </el-dialog>
+
+            <el-dialog title="登录" :visible.sync="signinVisible" width="40%">
+                <el-form :model="siin" ref="siin">
+                    <el-form-item label="邮箱" :label-width="formLabelWidth" prop="mail" :rules="[
+                    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+                    { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
+                  ]">
+                        <el-input v-model="siin.mail" autocomplete="off" placeholder="请输入邮箱"></el-input>
+                    </el-form-item>
+                    <el-form-item label="密码" prop="passwd" :label-width="formLabelWidth"
+                        :rules="[{ required: true, message: '请输入密码', trigger: 'blur' }]">
+                        <el-input show-password v-model="siin.passwd" autocomplete="off" placeholder="请输入密码">
+                        </el-input>
+                    </el-form-item>
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="signinVisible = false">取 消</el-button>
+                    <el-button native-type="submit" type="primary" @click="submitSignin('siin')" v-loading="loading">确 定
+                    </el-button>
+                </div>
+            </el-dialog>
+
+            {% endif %}
+
+
+        </el-container>
+    </el-container>
+    <br><br><br>
+
+    <el-container id="bodies">
+        <el-container style="width: 10%;"></el-container>
+        <el-container style="width: 60%;background-color: white;border: 5px solid #f9f9f9;">
+            <el-main>
+                {% block main_content %}
+                {% endblock %}
+            </el-main>
+        </el-container>
+
+        <el-container style="width: 20%;background-color: #f9f9f9;border: 5px solid #f9f9f9;">
+            <el-main style="position: fixed;width: 20%;z-index: 100;" id="poetry">
+                {% if poetry %}
+
+                {% else %}
+                <article>
+                    <h2>钗头凤</h2>
+                    <h4>宋 唐婉</h4>
+                    <p>世情薄，人情恶，雨送黄昏花易落。晓风干，泪痕残，欲笺心事，独语斜阑。难！难！难！</p>
+                    <p>今非昨，人成各，病魂常似秋千索。角声寒，夜阑珊，怕人询问，咽泪装欢。瞒！瞒！瞒！</p>
+                </article>
+                {% endif %}
+            </el-main>
+        </el-container>
+        <el-container style="width: 10%;"></el-container>
+    </el-container>
+    <div id="divider2">
+        <el-divider></el-divider>
+    </div>
+    <el-container id="rear">
+
+    </el-container>
+
+</body>
+
+
+
+<script>
+    var Main = {
+        data() {
+            var validateName = (rule, value, callback) => {
+                if (value === '') {
+                    callback(new Error('请输入昵称'));
+                } else {
+                    callback();
+                }
+            };
+            var validatePass = (rule, value, callback) => {
+                if (value === '') {
+                    callback(new Error('请输入密码'));
+                } else {
+                    if (this.siup.checkpasswd !== '') {
+                        this.$refs.siup.validateField('checkpasswd');
+                    }
+                    callback();
+                }
+            };
+            var validatePass2 = (rule, value, callback) => {
+                if (value === '') {
+                    callback(new Error('请再次输入密码'));
+                } else if (value !== this.siup.passwd) {
+                    callback(new Error('两次输入密码不一致!'));
+                } else {
+                    callback();
+                }
+            };
+            return {
+                activeIndex: '{% block active %}{% endblock %}',
+                loading: false,
+                signupVisible: false,
+                signinVisible: false,
+                siup: {
+                    name: '',
+                    mail: '',
+                    passwd: '',
+                    checkpaswd: '',
+                },
+                siin: {
+                    mail: '',
+                    passwd: '',
+                },
+                formLabelWidth: '100px',
+                siuprules: {
+                    name: [{
+                        required: true,
+                        validator: validateName,
+                        trigger: 'blur'
+                    }],
+                    passwd: [{
+                        required: true,
+                        validator: validatePass,
+                        trigger: 'blur'
+                    }],
+                    checkpasswd: [{
+                        required: true,
+                        validator: validatePass2,
+                        trigger: 'blur'
+                    }]
+                }
+            };
+        },
+        methods: {
+            submitSignup(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.loading = true
+                        axios.post('/api/register', {
+                            name: this.siup.name,
+                            email: this.siup.mail,
+                            passwd: this.siup.passwd
+                        }).then(response => {
+                            this.loading = false
+                            if (response.data == '') {
+                                this.$notify({
+                                    title: 'success',
+                                    message: '注册成功，即将跳转',
+                                    type: 'success',
+                                    offset: 100
+                                })
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 1500)
+                            } else {
+                                this.$notify({
+                                    title: 'warning',
+                                    message: response.data.message,
+                                    type: 'warning',
+                                    offset: 100
+                                })
+                                this.siup.mail = ''
+                                this.siup.passwd = ''
+                                this.siup.checkpasswd = ''
+                            }
+                        }).catch(error => {
+                            this.loading = false
+                            this.$notify.error({
+                                title: 'wrong',
+                                message: '似乎出现的一点问题...重试一下吧',
+                                offset: 100
+                            })
+                        })
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            submitSignin(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.loading = true
+                        axios.post('/api/signin', {
+                            email: this.siin.mail,
+                            passwd: this.siin.passwd
+                        }).then(response => {
+                            this.loading = false
+                            if (response.data == '') {
+                                this.$notify({
+                                    title: 'success',
+                                    message: '登录成功，即将跳转',
+                                    type: 'success',
+                                    offset: 100
+                                })
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 1500)
+                            } else {
+                                this.$notify({
+                                    title: 'warning',
+                                    message: response.data.message,
+                                    type: 'warning',
+                                    offset: 100
+                                })
+                                this.siin.passwd = ''
+                            }
+                        }).catch(error => {
+                            this.loading = false
+                            this.$notify.error({
+                                title: 'wrong',
+                                message: '似乎出现的一点问题...重试一下吧',
+                                offset: 100
+                            })
+                        })
+                    } else {
+                        return false;
+                    }
+                });
+            }
+        }
+    };
+    var Ctor = Vue.extend(Main)
+    new Ctor().$mount('#nav_bar')
+
+
+    var Bod = {
+        {% block body_script %} {% endblock %}
+    }
+    var Ctor = Vue.extend(Bod)
+    new Ctor().$mount('#bodies')
+
+    new Vue().$mount('#divider2')
+
+    var Rear = {
+        {% block rear_script %} {% endblock %}
+    }
+    var Ctor = Vue.extend(Rear)
+    new Ctor().$mount('#rear')
+</script>
+
+</html>

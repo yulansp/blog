@@ -82,12 +82,12 @@ class Field(object):
 
 
 class StringField(Field):
-    def __init__(self, name=None, column_type='varchar(100)', prime_key=False, default=None):
+    def __init__(self, name=None, column_type='varchar(100)', prime_key=False, default=''):
         super().__init__(name, column_type, prime_key, default)
 
 
 class IntegerField(Field):
-    def __init__(self, name=None, column_type='int', prime_key=False, default=0):
+    def __init__(self, name=None, column_type='bigint', prime_key=False, default=0):
         super().__init__(name, column_type, prime_key, default)
 
 
@@ -102,12 +102,12 @@ class FloatField(Field):
 
 
 class DatetimeField(Field):
-    def __init__(self, name=None, column_type='datetime', prime_key=False, default=None):
+    def __init__(self, name=None, column_type='datetime', prime_key=False, default='NULL'):
         super().__init__(name, column_type, prime_key, default)
 
 
 class TextField(Field):
-    def __init__(self, name=None, column_type='text', prime_key=False, default=None):
+    def __init__(self, name=None, column_type='text', prime_key=False, default=''):
         super().__init__(name, column_type, prime_key, default)
 
 
@@ -281,6 +281,8 @@ class Model(dict, metaclass=ModelMeatclass):
         rows = await execute(self.__insert__, args)
         if rows != 1:
             logging.info('Faield to insert record:affected rows: %s' % rows)
+            return False
+        return True
 
     # UPDATE command
     async def update(self):
@@ -289,7 +291,8 @@ class Model(dict, metaclass=ModelMeatclass):
         rows = await execute(self.__update__, args)
         if rows != 1:
             logging.info('Faield to update by primary_key:affectesd rows: %s' % rows)
-            print('Faield to update by primary_key:affectesd rows: %s' % rows)
+            return False
+        return True
 
     # DELETE command
     async def delete(self):
@@ -297,3 +300,5 @@ class Model(dict, metaclass=ModelMeatclass):
         rows = await execute(self.__delete__, args)
         if rows != 1:
             logging.info('Faield to remove by primary key:affected: %s' % rows)
+            return False
+        return True

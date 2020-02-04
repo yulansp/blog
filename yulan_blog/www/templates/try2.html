@@ -1,0 +1,425 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+
+    
+    <!-- block meta  -->
+    <title>1014 Waiting in Line (30分) - 语阑个人博客</title>
+    <link rel="stylesheet" href="../static/index.css">
+    <script src="../static/vue.js"></script>
+    <script src="../static/index.js"></script>
+    <script src="../static/axios.min.js"></script>
+    
+    <!-- before head  -->
+
+    <style>
+        .el-menu-item .el-link {
+            font-size: 18px;
+        }
+
+        #poetry {
+            font-family: STKaiti;
+            background-color: white;
+        }
+
+        #poetry p {
+            font-size: 19px;
+        }
+
+        #poetry h1 {
+            font-size: 28px;
+        }
+
+        #poetry h2 {
+            font-size: 28px;
+        }
+
+        #poetry h3 {
+            font-size: 16px;
+        }
+
+        #poetry h4 {
+            font-size: 16px;
+        }
+    </style>
+
+</head>
+
+<body style="background-color: #f9f9f9;">
+    <el-container id="nav_bar" style="position: fixed;background-color: white;
+    width: 100%;top:0;left: 0;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);z-index: 9990;">
+        <el-backtop>
+            <div
+                style="height: 100%;width: 100%;background-color: #f2f5f6;box-shadow: 0 0 6px rgba(0,0,0, .12);text-align: center;line-height: 40px;color: #1989fa;">
+                UP</div>
+        </el-backtop>
+        <el-aside width="10%"><a href="/"><img src="../static/imgs/头像.png" width="50px" height="50px" style="position: absolute;left: 5%;top: 3px;"></a></el-aside>
+        <el-container style="width: 60%;">
+            <el-header style="align-self: center;width: 70%;">
+                <el-menu class="el-menu-demo" mode="horizontal" text-color="#000000" active-text-color="#d93896" :default-active="activeIndex">
+                    <el-menu-item index="首页">
+                        <el-link href="/">首页</el-link>
+                    </el-menu-item>
+                    <el-menu-item index="技术">
+                        <el-link href="/skill">技术</el-link>
+                    </el-menu-item>
+                    <el-menu-item index="读书">
+                        <el-link href="/read">读书</el-link>
+                    </el-menu-item>
+                    <el-menu-item index="杂谈">
+                        <el-link href="/something">杂谈</el-link>
+                    </el-menu-item>
+                    <el-menu-item index="关于">
+                        <el-link href="/about">关于</el-link>
+                    </el-menu-item>
+                </el-menu>
+            </el-header>
+        </el-container>
+        <el-container style="width: 20%;align-self: center;" id="user">
+            
+            <el-dropdown style="z-index: 9999;">
+                <el-button type="primary" icon="el-icon-user-solid">语阑
+                </el-button>
+                <el-dropdown-menu slot="dropdown" >
+                    <el-dropdown-item>
+                        <el-link href="/api/signout">登出</el-link>
+                    </el-dropdown-item>
+                    
+                    <el-dropdown-item>
+                        <el-link href="/admin">文章管理</el-link>
+                    </el-dropdown-item>
+                    
+                </el-dropdown-menu>
+            </el-dropdown>
+            
+
+
+        </el-container>
+    </el-container>
+    <br><br><br>
+
+    <el-container id="bodies">
+        <el-container style="width: 10%;"></el-container>
+        <el-container style="width: 60%;background-color: white;border: 5px solid #f9f9f9;">
+            <el-main>
+                
+    <link rel="stylesheet" href="../static/md/github.css">
+    <link rel="stylesheet" href="../static/md/styles/atom-one-light.css">
+    
+    <div class="markdown-body">
+        <h1 style="font-size: 36px;border-bottom: 0;padding-bottom: 0;">1014 Waiting in Line (30分)</h1>
+        <el-tooltip  placement="bottom-start" effect="light" content="创建于2020-02-03 19:53:39">
+            <span style="font-size: 10px;color: #999999;">发布于 2020-02-03 20:12:38</span>
+        </el-tooltip>
+        <el-divider></el-divider>
+        <p><a href="https://pintia.cn/problem-sets/994805342720868352/problems/994805498207911936" target="_blank">题目链接</a><br>
+看下时间</p>
+<h3 id="">题目大意</h3>
+<p>模拟一个银行等待队列，银行有n个窗口，每个窗口前有m个位置，不能进入位置的客户按照顺序id等待，当有位置空出时进入，给出被询问客户的服务完成时间。
+注意：银行在17:00关门，不能在此前被服务的人只能"Sorry"了。
+<strong>注意注意注意：这里是指在17:00未被服务，若服务已经开始，便将服务完成。</strong></p>
+<h3 id="-1">思路</h3>
+<p>用一个循环模拟时间演进，服务完一个客户就让下一个客户进入排队。</p>
+<h3 id="-2">代码如下</h3>
+<pre><code class="cpp language-cpp hljs"><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> _CRT_SECURE_NO_WARNINGS</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;vector&gt;</span></span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> <span class="hljs-built_in">std</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">print_time</span><span class="hljs-params">(<span class="hljs-keyword">int</span> t)</span>
+</span>{    <span class="hljs-comment">//时间输出函数</span>
+    <span class="hljs-keyword">if</span> (t == <span class="hljs-number">-1</span>)
+    {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">"Sorry
+"</span>);
+        <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">int</span> h, m;
+    h = t / <span class="hljs-number">60</span> + <span class="hljs-number">8</span>;
+    m = t % <span class="hljs-number">60</span>;
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">"%02d:%02d
+"</span>, h, m);
+}
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">int</span> n, m, k, q;
+    <span class="hljs-built_in">cin</span> &gt;&gt; n &gt;&gt; m &gt;&gt; k &gt;&gt; q;
+    <span class="hljs-function"><span class="hljs-built_in">vector</span>&lt;<span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; &gt; <span class="hljs-title">bank</span><span class="hljs-params">(n, <span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt;(m))</span></span>;<span class="hljs-comment">//银行窗口</span>
+    <span class="hljs-function"><span class="hljs-built_in">vector</span>&lt;<span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; &gt; <span class="hljs-title">server_customer_id</span><span class="hljs-params">(n, <span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt;(m))</span></span>;<span class="hljs-comment">//记录当前服务客户的id</span>
+    <span class="hljs-function"><span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; <span class="hljs-title">use_time</span><span class="hljs-params">(k + <span class="hljs-number">1</span>)</span></span>;
+    <span class="hljs-function"><span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; <span class="hljs-title">end_time</span><span class="hljs-params">(k + <span class="hljs-number">1</span>,<span class="hljs-number">-1</span>)</span></span>;<span class="hljs-comment">//-1标记未能服务</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>; i &lt;= k; i++)
+        <span class="hljs-built_in">scanf</span>(<span class="hljs-string">"%d"</span>, &amp;use_time[i]);
+    <span class="hljs-keyword">int</span> customer_id = <span class="hljs-number">1</span>, now_time = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> j = <span class="hljs-number">0</span>;j &lt; m;j++)
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; n; i++)
+        {
+            <span class="hljs-keyword">if</span> (customer_id &lt;= k)<span class="hljs-comment">//应对客户少于窗口数</span>
+            {
+                server_customer_id[i][j] = customer_id;
+                bank[i][j] = use_time[customer_id++];
+            }
+        }
+
+    <span class="hljs-keyword">bool</span> server_over;
+    <span class="hljs-keyword">while</span> (++now_time &lt;= <span class="hljs-number">540</span>)
+    {
+        server_over = <span class="hljs-literal">true</span>;<span class="hljs-comment">//记录是否全部客户服务完成</span>
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; n; i++)
+        {
+            <span class="hljs-keyword">if</span> (bank[i].size())
+            {   <span class="hljs-comment">//窗口i仍有客户</span>
+                server_over = <span class="hljs-literal">false</span>;
+                bank[i][<span class="hljs-number">0</span>]--;
+                <span class="hljs-keyword">if</span> (bank[i][<span class="hljs-number">0</span>] == <span class="hljs-number">0</span>)
+                {
+                    end_time[server_customer_id[i][<span class="hljs-number">0</span>]] = now_time;
+                    server_customer_id[i].erase(server_customer_id[i].begin());
+                    bank[i].erase(bank[i].begin());
+
+                    <span class="hljs-keyword">if</span> (customer_id &lt;= k)<span class="hljs-comment">//客户数为k</span>
+                    {
+                        server_customer_id[i].push_back(customer_id);
+                        bank[i].push_back(use_time[customer_id++]);
+                    }
+                }
+            }
+        }
+        <span class="hljs-keyword">if</span> (server_over)
+            <span class="hljs-keyword">break</span>;      
+    }
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; n; i++)
+    {
+        <span class="hljs-keyword">if</span> (bank[i].size() &amp;&amp; bank[i][<span class="hljs-number">0</span>] != use_time[server_customer_id[i][<span class="hljs-number">0</span>]])
+        {   <span class="hljs-comment">//处理17:00时已经开始服务的客户</span>
+            end_time[server_customer_id[i][<span class="hljs-number">0</span>]] = <span class="hljs-number">540</span> + bank[i][<span class="hljs-number">0</span>];
+        }
+    }
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>; i &lt;= q; i++)
+    {
+        <span class="hljs-built_in">scanf</span>(<span class="hljs-string">"%d"</span>, &amp;customer_id);
+        print_time(end_time[customer_id]);
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-comment">/*
+2 2 7 5
+1 2 6 4 3 533 2
+3 4 5 6 7
+
+*/</span>
+</code></pre>
+    </div>
+    <div id="comment">
+        <el-row>
+            <el-col :span="24"><div style="background-color: #d3dce6;"></div></el-col>
+        </el-row>
+    </div>
+
+            </el-main>
+        </el-container>
+
+        <el-container style="width: 20%;background-color: #f9f9f9;border: 5px solid #f9f9f9;">
+            <el-main style="position: fixed;width: 20%;z-index: 100;" id="poetry">
+                
+                <article>
+                    <h2>钗头凤</h2>
+                    <h4>宋 唐婉</h4>
+                    <p>世情薄，人情恶，雨送黄昏花易落。晓风干，泪痕残，欲笺心事，独语斜阑。难！难！难！</p>
+                    <p>今非昨，人成各，病魂常似秋千索。角声寒，夜阑珊，怕人询问，咽泪装欢。瞒！瞒！瞒！</p>
+                </article>
+                
+            </el-main>
+        </el-container>
+        <el-container style="width: 10%;"></el-container>
+    </el-container>
+    <div id="divider2">
+        <el-divider></el-divider>
+    </div>
+    <el-container id="rear">
+
+    </el-container>
+
+</body>
+
+
+
+<script>
+    var Main = {
+        data() {
+            var validateName = (rule, value, callback) => {
+                if (value === '') {
+                    callback(new Error('请输入昵称'));
+                } else {
+                    callback();
+                }
+            };
+            var validatePass = (rule, value, callback) => {
+                if (value === '') {
+                    callback(new Error('请输入密码'));
+                } else {
+                    if (this.siup.checkpasswd !== '') {
+                        this.$refs.siup.validateField('checkpasswd');
+                    }
+                    callback();
+                }
+            };
+            var validatePass2 = (rule, value, callback) => {
+                if (value === '') {
+                    callback(new Error('请再次输入密码'));
+                } else if (value !== this.siup.passwd) {
+                    callback(new Error('两次输入密码不一致!'));
+                } else {
+                    callback();
+                }
+            };
+            return {
+                activeIndex:'',
+                loading:false,
+                signupVisible: false,
+                signinVisible: false,
+                siup: {
+                    name: '',
+                    mail: '',
+                    passwd: '',
+                    checkpaswd: '',
+                },
+                siin: {                    
+                    mail: '',
+                    passwd: '',
+                },
+                formLabelWidth: '100px',
+                siuprules: {
+                    name: [{
+                        required: true,
+                        validator: validateName,
+                        trigger: 'blur'
+                    }],
+                    passwd: [{
+                        required: true,
+                        validator: validatePass,
+                        trigger: 'blur'
+                    }],
+                    checkpasswd: [{
+                        required: true,
+                        validator: validatePass2,
+                        trigger: 'blur'
+                    }]
+                }                
+            };
+        },
+        methods: {
+            submitSignup(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.loading = true
+                        axios.post('/api/register', {
+                            name: this.siup.name,
+                            email: this.siup.mail,
+                            passwd: this.siup.passwd
+                        }).then(response => {
+                            this.loading = false
+                            if (response.data == '') {
+                                this.$notify({
+                                    title: 'success',
+                                    message: '注册成功，即将跳转',
+                                    type: 'success',
+                                    offset: 100
+                                })
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 1500)
+                            }
+                            else {
+                                this.$notify({
+                                    title:'warning',
+                                    message:response.data.message,
+                                    type:'warning',
+                                    offset: 100
+                                })
+                                this.siup.mail = ''
+                                this.siup.passwd = ''
+                                this.siup.checkpasswd = ''
+                            }
+                        }).catch(error => {
+                            this.loading = false
+                            this.$notify.error({
+                                title: 'wrong',
+                                message: '似乎出现的一点问题...重试一下吧',
+                                offset: 100
+                            })
+                        })
+                    } else {
+                        return false;
+                    }
+                });                
+            },
+            submitSignin(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.loading = true
+                        axios.post('/api/signin', {
+                            email: this.siin.mail,
+                            passwd: this.siin.passwd
+                        }).then(response => {
+                            this.loading = false
+                            if (response.data == '') {
+                                this.$notify({
+                                    title: 'success',
+                                    message: '登录成功，即将跳转',
+                                    type: 'success',
+                                    offset: 100
+                                })
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 1500)
+                            }
+                            else {
+                                this.$notify({
+                                    title:'warning',
+                                    message:response.data.message,
+                                    type:'warning',
+                                    offset: 100
+                                })
+                                this.siin.passwd = ''
+                            }
+                        }).catch(error => {
+                            this.loading = false
+                            this.$notify.error({
+                                title: 'wrong',
+                                message: '似乎出现的一点问题...重试一下吧',
+                                offset: 100
+                            })
+                        })
+                    } else {
+                        return false;
+                    }
+                });                
+            }
+        }
+    };
+    var Ctor = Vue.extend(Main)
+    new Ctor().$mount('#nav_bar')
+
+    
+    var Bod = {
+        
+    }
+    var Ctor = Vue.extend(Bod)
+    new Ctor().$mount('#bodies') 
+
+    new Vue().$mount('#divider2')
+
+    var Rear = {
+        
+    }
+    var Ctor = Vue.extend(Rear)
+    new Ctor().$mount('#rear') 
+</script>
+
+</html>
