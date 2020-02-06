@@ -451,6 +451,6 @@ async def get_comment_list(blog_id):
     return web.json_response(parentcomment)
 
 
-if __name__ == '__main__':
+def main():
     init()
 
