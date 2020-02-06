@@ -1,5 +1,5 @@
 from aiohttp import web
-import json,logging,time,hashlib
+import logging,time,hashlib,os
 from models import User
 from config import configs
 
@@ -60,6 +60,9 @@ async def res_middleware(request, handler):
             return web.json_response(r)
         else:
             r['user'] = request.__user__
+            shicifile = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates', 'shici.html')
+            with open(shicifile,'rb') as f:
+                r['poetry'] = f.read().decode('utf-8')
             resp = web.Response(
                 body=request.app['__templating__'].get_template(template).render(**r).encode('utf-8'),content_type='text/html', charset='utf-8')
             return resp

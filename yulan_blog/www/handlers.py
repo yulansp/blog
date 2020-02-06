@@ -28,7 +28,8 @@ async def index(page=1):
         'blogs': blogs,
         'classfication' : 'main',
         'total_item' : total,
-        'current_page': page
+        'current_page': page,
+        'title': '首页'
     }
 
 @get('/skill')
@@ -44,7 +45,8 @@ async def index(page=1):
         'blogs': blogs,
         'classfication' : 'skill',
         'total_item': total,
-        'current_page': page
+        'current_page': page,
+        'title': '技术'
     }
 
 @get('/read')
@@ -60,7 +62,8 @@ async def index(page=1):
         'blogs': blogs,
         'classfication' : 'read',
         'total_item': total,
-        'current_page': page
+        'current_page': page,
+        'title': '读书'
     }
 
 @get('/something')
@@ -76,7 +79,8 @@ async def index(page=1):
         'blogs': blogs,
         'classfication' : 'something',
         'total_item': total,
-        'current_page': page
+        'current_page': page,
+        'title': '杂谈'
     }
 
 @get('/about')
@@ -154,7 +158,7 @@ def signout(request):
 def admin(request):
     if request.__user__:
         if request.__user__.admin:
-            path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static','admin.html')
+            path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates','admin.html')
             with open(path,'r',encoding='utf-8') as f:
                 return web.Response(text=f.read(),content_type='text/html')
 
@@ -162,7 +166,7 @@ def admin(request):
     return web.HTTPForbidden()
 
 @get('/edit')
-def admin(request):
+def edit(request):
     if request.__user__:
         if request.__user__.admin:
             template = 'edit.html'
@@ -308,6 +312,26 @@ async def comment_manage(request,page = 1):
     logging.warning('Try commentmanage without authorize')
     return web.HTTPForbidden()
 
+@get('/api/usermanage')
+async def user_manage(request,page = 1):
+    if request.__user__:
+        if request.__user__.admin:
+            page = int(page)
+            total = await User.FindNumber('count(*)')
+            page_count = total // item_per_page_manage + (1 if total % item_per_page > 0 else 0)
+            if page < 1 or page > page_count:
+                page = 1
+            users = await User.FindAll(orderBy='created_at desc', limit=((page - 1) * item_per_page_manage, item_per_page_manage))
+            return {
+                'total_item' : total,
+                'userdata' : [
+                    {'name' : user.name,
+                     'created_at' : strftime('%Y-%m-%d', time.localtime(user.created_at))}
+                    for user in users
+                ]
+            }
+    logging.warning('Try usermanage without authorize')
+    return web.HTTPForbidden()
 
 @get('/api/delete')
 async def delete(request,id,operation):

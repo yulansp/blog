@@ -8,7 +8,7 @@
     {% endblock %}
     <title>{% block title %}语阑{% endblock %} - 语阑个人博客</title>
     <link rel="stylesheet" href="../static/index.css">
-    <script src="../static/vue.js"></script>
+    <script src="../static/vue.min.js"></script>
     <script src="../static/index.js"></script>
     <script src="../static/axios.min.js"></script>
     {% block beforehead %}
@@ -159,24 +159,23 @@
 
     <el-container id="bodies">
         <el-container style="width: 10%;"></el-container>
-        <el-container style="width: 60%;background-color: white;border: 5px solid #f9f9f9;">
+        <el-container style="width: 55%;background-color: white;border: 5px solid #f9f9f9;">
             <el-main>
                 {% block main_content %}
                 {% endblock %}
             </el-main>
         </el-container>
 
-        <el-container style="width: 20%;background-color: #f9f9f9;border: 5px solid #f9f9f9;">
-            <el-main style="position: fixed;width: 20%;z-index: 100;" id="poetry">
+        <el-container style="width: 26%;background-color: #f9f9f9;border: 5px solid #f9f9f9;">
+            <el-main style="position: fixed;width: 26%;z-index: 100;" id="poetry">
                 {% if poetry %}
-
+                    {{ poetry|safe }}
                 {% else %}
-                <article>
                     <h2>钗头凤</h2>
-                    <h4>宋 唐婉</h4>
-                    <p>世情薄，人情恶，雨送黄昏花易落。晓风干，泪痕残，欲笺心事，独语斜阑。难！难！难！</p>
-                    <p>今非昨，人成各，病魂常似秋千索。角声寒，夜阑珊，怕人询问，咽泪装欢。瞒！瞒！瞒！</p>
-                </article>
+                    <h4>唐婉</h4>
+                    <p>
+                        世情薄，人情恶，雨送黄昏花易落。晓风干，泪痕残。欲笺心事，独语斜阑。难，难，难！<br>人成各，今非昨，病魂常似秋千索。角声寒，夜阑珊。怕人寻问，咽泪装欢。瞒，瞒，瞒！ 
+                    </p>
                 {% endif %}
             </el-main>
         </el-container>
@@ -186,7 +185,8 @@
         <el-divider></el-divider>
     </div>
     <el-container id="rear">
-
+        <a href="https://github.com/yulansp"><img src="../static/imgs/github.png" width="30px" height="30px" 
+            style="position: absolute; left: 50%;"></a><br>
     </el-container>
 
 </body>
