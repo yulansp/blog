@@ -14,7 +14,6 @@ class User(Model):
     passwd = StringField(column_type='varchar(50)')
     admin = BoolField()
     name = StringField(column_type='varchar(50)')
-    image = StringField(column_type='varchar(500)')
     created_at = FloatField(default=time.time)
 
 
@@ -24,7 +23,6 @@ class Blog(Model):
     id = StringField(prime_key=True, default=next_id, column_type='varchar(50)')
     user_id = StringField(column_type='varchar(50)')
     user_name = StringField(column_type='varchar(50)')
-    user_image = StringField(column_type='varchar(500)')
     name = StringField(column_type='varchar(50)')
     summary = StringField(column_type='varchar(200)')
     content = TextField()
