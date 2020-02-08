@@ -4,14 +4,14 @@ configs = {
         'host': '127.0.0.1',
         'port': 3306,
         'user': 'root',
-        'password': '@wht990125',
+        'password': '**',
         'db': 'yulan_blog'
     },
     'web':{
         'host':'127.0.0.1',
-        'port':8000
+        'port':****
     },
     'session': {
-        'secret': 'shiqingbo'
+        'secret': '**'
     }
 }
