@@ -1,0 +1,70 @@
+{% extends '__base__.html' %}
+
+{% block title %}关于 - 语阑{% endblock %}
+
+{% block beforehead %}
+<style>
+    .title {
+        font-size: 28px;
+    }
+</style>
+{% endblock %}
+{% block main_content %}
+<div>
+    <h1 class="title">
+        <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-meihua"></use>
+        </svg>
+        关于我
+    </h1>
+    <ul>
+        <li>一枚机械系学生，跨考计算机中</li>
+        <li>平时在此分享一些经验，也聊聊生活</li>
+        <li>本站佛系更新，毕竟，考研的孩子还是很忙的</li>
+        <li>联系我: <el-link href="mailto:yulansp@qq.com"><svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-youjian"></use>
+                </svg>yulansp@qq.com</el-link>
+        </li>
+    </ul>
+</div>
+<div>
+    <h1 class="title">
+        <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-zhishangushan"></use>
+        </svg>
+        关于本站
+    </h1>
+    <ul>
+        <li>前端：vue + element-ui</li>
+        <li>后端：python异步io</li>
+        <li>存储：Redis + MySQL</li>
+        <li>服务器：腾讯云</li>
+    </ul>
+</div>
+<h1 class="title">
+    <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-fudai"></use>
+    </svg>
+    重大事件
+</h1>
+<div>
+    <el-timeline>
+    {% for timestamp in timeline %}    
+        <el-timeline-item timestamp="{{timestamp.release_time}}" placement="top">
+            {{timestamp.content}}
+        </el-timeline-item>
+    {% endfor %}
+    </el-timeline>
+</div>
+{% endblock %}
+
+{% block active %}about{% endblock %}
+
+{% block body_script %}
+<script>
+    var Bod = {
+    }
+    var Ctor = Vue.extend(Bod)
+    new Ctor().$mount('#bodies')
+</script>
+{% endblock %}

@@ -1,0 +1,219 @@
+{% extends '__base__.html' %}
+
+{% block title %}{{ blog.name }}{% endblock %}
+
+{% block beforehead %}
+<style>
+    #comment strong {
+        color: #cf1861;
+    }
+</style>
+{% endblock %}
+
+{% block main_content %}
+<link rel="stylesheet" href="../static/md/github.css">
+<link rel="stylesheet" href="../static/md/styles/atom-one-light.css">
+
+
+    <h1 id="blog_name" style="font-size: 36px;border-bottom: 0;padding-bottom: 0;margin-top: 12px;margin-bottom: 12px;">{{ blog.name }}</h1>
+    <el-tooltip placement="bottom-start" effect="light" content="创建于{{ blog.created_at|datetime }}">
+        <span style="font-size: 10px;color: #999999;">发布于 {{blog.revised_at|datetime}}</span>
+    </el-tooltip>
+    <el-divider></el-divider>
+    <div class="markdown-body" id="blog_content">
+        {{ blog.content_html | safe}}
+    </div>
+<br>
+<h2 style="font-size: 24px;">
+    <svg class="icon svg-icon" aria-hidden="true" >
+        <use xlink:href="#icon-bianji"></use>
+    </svg>
+    发布评论 
+</h2>
+<el-input type="textarea" :rows="6" placeholder="请输入内容" v-model="textareacomment">
+</el-input>
+<el-button type="primary" plain @click="comment()" v-loading="loadingcomment">发送</el-button>
+<div id="comment">
+    <div style="margin-bottom: 20px;">
+        <h2 id="allcomment" style="font-size: 24px;">
+            <svg class="icon svg-icon" aria-hidden="true" >
+                <use xlink:href="#icon-mulu"></use>
+            </svg>
+            全部评论
+        </h2>
+    </div>
+
+    <div v-for="(item,index) in parentcomment"
+        style="margin-bottom: 20px;border-radius: 8px;background-color: #fafafa;padding-left: 20px;padding-right: 20px;padding-bottom: 5px;padding-top: 5px;float: left;width: 95%;"
+        :key="index">
+        <div style="float: left;width: 10%;">
+            <img :src="item.img" width="50px" height="50px" style="position: relative;top: 20px;">
+        </div>
+        <div style="float: left;width: 80%;">
+            <p style="font-size: 20px;margin-bottom: 0;"><strong>{[ item.name ]}</strong></p>
+            <p style="color: #b6bbc4;margin-top: 0;font-size: 14px;">{[ item.time ]}</p>
+            <p style="color: rgb(70, 70, 70);margin-top: 6px;margin-bottom: 6px;">{[ item.content ]}</p>
+            <el-popover placement="right" width="400" trigger="click">
+                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="textareareply">
+                </el-input>
+                <el-button size="mini" type="primary" plain @click="reply(item.id,index,item.name)"
+                    v-loading="loadingreply">发送</el-button>
+                <el-button slot="reference" type="text" icon="el-icon-edit" style="color: rgb(26, 125, 224);">回复
+                </el-button>
+            </el-popover>
+            <div v-for="(subitem,subindex) in item.subcomment" :key="subindex" style="float: left;width: 100%;">
+                <div style="display: block; height: 1px; margin: 0; background-color: #DCDFE6; ">
+                </div>
+                <div>
+                    <div style="float: left;width: 12.5%;">
+                        <img :src="subitem.img" width="50px" height="50px" style="position: relative;top: 20px;">
+                    </div>
+                    <div style="float: left;width: 87.5%;">
+                        <p style="font-size: 20px;margin-bottom: 0;"><strong>{[ subitem.name ]}</strong></p>
+                        <p style="color: #b6bbc4;margin-top: 0;font-size: 14px;">{[ subitem.time ]}</p>
+                        <p style="color: rgb(70, 70, 70);margin-top: 6px;margin-bottom: 6px;">{[ subitem.content ]}</p>
+                        <div>
+                            <el-popover placement="right" width="400" trigger="click">
+                                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="textareareply">
+                                </el-input>
+                                <el-button size="mini" type="primary" plain @click="reply(item.id,index,subitem.name)"
+                                    v-loading="loadingreply">发送</el-button>
+                                <el-button slot="reference" type="text" icon="el-icon-edit"
+                                    style="color: rgb(26, 125, 224);margin-top: 0;margin-bottom: 0;">回复</el-button>
+                            </el-popover>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block active %}{{ classfication }}{% endblock %}
+
+{% block body_script %}
+<script>
+    var Bod = {
+        delimiters: ['{[', ']}'],
+        data() {
+            return {
+                loadingcomment: false,
+                loadingreply: false,
+                blog_id: '',
+                textareacomment: '',
+                textareareply: '',
+                parentcomment: [],
+            }
+        },
+        created: function () {
+            let h = location.href
+            let start = h.indexOf("=") + 1
+            this.blog_id = h.substring(start)
+            axios.get('/api/commentlist', {
+                params: {
+                    blog_id: this.blog_id
+                }
+            }).then(response => {
+                this.parentcomment = response.data
+            }).catch(error => {
+                console.log(error)
+            })
+        },
+        methods: {
+            reply: function (parentid, index, replyto) {
+                if (this.textareareply === '') {
+                    this.$notify({
+                        title: 'wrong',
+                        message: '回复内容不能为空',
+                        offset: 100,
+                        type: 'error'
+                    })
+                } else {
+                    this.loadingreply = true
+                    axios.post('/api/comment', {
+                        content: this.textareareply,
+                        blog_id: this.blog_id,
+                        parent_id: parentid,
+                        reply_to: replyto,
+                        blog_name: document.getElementById('blog_name').innerText
+                    }).then(response => {
+                        this.loadingreply = false
+                        document.getElementById("allcomment").click();
+                        this.$notify({
+                            title: '成功',
+                            message: '回复成功',
+                            offset: 100,
+                            type: 'success'
+                        })
+                        this.parentcomment[index].subcomment.unshift({
+                            id: response.data.id,
+                            content: this.textareareply,
+                            name: response.data.name,
+                            img: response.data.img,
+                            time: "1分钟前",
+                            reply_to: replyto
+                        })
+                        this.textareareply = ''
+                    }).catch(error => {
+                        console.log(error)
+                        this.loadingreply = false
+                        this.$notify.error({
+                            title: 'wrong',
+                            message: '似乎出现的一点问题...重试一下吧',
+                            offset: 100
+                        })
+                    })
+                }
+            },
+            comment: function () {
+                if (this.textareacomment === '') {
+                    this.$notify({
+                        title: 'wrong',
+                        message: '评论内容不能为空',
+                        offset: 100,
+                        type: 'error'
+                    })
+                } else {
+                    this.loadingcomment = true
+                    axios.post('/api/comment', {
+                        content: this.textareacomment,
+                        blog_id: this.blog_id,
+                        parent_id: '0',
+                        reply_to: '',
+                        blog_name: document.getElementById('blog_name').innerText
+                    }).then(response => {
+                        this.loadingcomment = false
+                        document.getElementById("allcomment").click();
+                        this.$notify({
+                            title: '成功',
+                            message: '评论成功',
+                            offset: 100,
+                            type: 'success'
+                        })
+                        this.parentcomment.unshift({
+                            id: response.data.id,
+                            content: this.textareacomment,
+                            name: response.data.name,
+                            time: "1分钟前",
+                            img: response.data.img,
+                            reply_to: '',
+                            subcomment: []
+                        })
+                        this.textareacomment = ''
+                    }).catch(error => {
+                        this.loadingcomment = false
+                        this.$notify.error({
+                            title: 'wrong',
+                            message: '似乎出现的一点问题...重试一下吧',
+                            offset: 100
+                        })
+                    })
+                }
+            }
+        }
+    }
+    var Ctor = Vue.extend(Bod)
+    new Ctor().$mount('#bodies')
+</script>
+{% endblock %}

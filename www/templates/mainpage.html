@@ -1,0 +1,63 @@
+{% extends '__base__.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block main_content %}
+    {% for blog in blogs %}
+    <article>
+        <h1>
+            <el-link href="/blog?id={{blog.id}}" style="font-size: 20px;color: black;"><strong>{{blog.name}}</strong>
+        </h1>
+        <el-tooltip placement="bottom-start" effect="light" content="创建于{{ blog.created_at|datetime }}">
+            <span style="font-size: 14px;color: #999999;">发布于 {{blog.revised_at|datetime}}</span>
+        </el-tooltip>
+        <p style="color: #606266;">{{blog.summary}}</p>
+        <el-divider></el-divider>
+    </article>
+    {% endfor %}
+    <el-pagination 
+    background
+    layout="prev, pager, next"
+    :total="total" :current-page="current_page" :pager-count="pager_count" :page-size="page_size" @current-change="handleCurrentChange" @prev-click="handelPre" @next-click="handelNext">
+    </el-pagination>
+    {% endblock %}
+
+
+{% block active %}{{ classfication }}{% endblock %}
+
+{% block body_script %}
+<script>
+    var Bod = {
+        data() {
+            return {
+                current_page: {{current_page}}, 
+                pager_count: 5,
+                page_size: 15,
+                total: {{total_item}}
+            }
+        },
+        methods: {
+            handleCurrentChange: function (currentPage) {
+                let h = location.href
+                let end = h.indexOf("?")
+                newhref = h.substring(0,end) + '?page=' + String(currentPage)
+                location.href = newhref
+            },
+            handelPre: function (currentPage) {
+                let h = location.href
+                let end = h.indexOf("?")
+                newhref = h.substring(0,end) + '?page=' + String(currentPage)
+                location.href = newhref
+            },
+            handelNext: function (currentPage) {
+                let h = location.href
+                let end = h.indexOf("?")
+                newhref = h.substring(0,end) + '?page=' + String(currentPage)
+                location.href = newhref
+            }
+        }
+    }
+    var Ctor = Vue.extend(Bod)
+    new Ctor().$mount('#bodies')
+</script>
+{% endblock %}
