@@ -44,7 +44,6 @@
                         accept="image/png, image/jpeg,"
                         name="photo_name"
                         :before-upload="beforeAvatarUpload"
-                        :limit="1"
                         :show-file-list="false"
                         with-credentials
                         :on-success="upload_success"
@@ -106,8 +105,6 @@
         },
         methods: {
             beforeAvatarUpload(file) {
-                console.log(file)
-                console.log(file.name)
                 const isJPG = file.type === 'image/jpeg';
                 const isPNG = file.type === 'image/png';
 

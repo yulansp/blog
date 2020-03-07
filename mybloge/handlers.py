@@ -6,7 +6,6 @@ from time import strftime
 from yulan import get,post,file_post
 from models import User,Blog,Comment,Timeline
 from apis import APIError,APIValueError,APIResourceNotFoundError,APIPermissionError
-from config import configs
 import rds
 from cookies import _COOKIE_KEY,COOKIE_NAME,user_to_cookie
 

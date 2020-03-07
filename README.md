@@ -8,6 +8,15 @@ yulan是一个基于aiohttp3.6.2二次封装的web框架
 * 附带一个简易orm
 
 ## get start
+首先创建如下目录
+```python
++- www/                  <-- Web目录
+|  |
+|  +- static/            <-- 存放静态文件
+|  |
+|  +- templates/         <-- 存放模板文件
+|  app.py
+```
 simple use
 ```python
 from yulan import runapp
@@ -17,7 +26,7 @@ async def hello():
 
 runapp()
 ```
-get with a query string such as `http://127.0.0.1:5000/?name=yyy`
+GET with a query string such as `http://127.0.0.1:5000/?name=yyy`
 ```python
 from yulan import runapp
 @get('/')
@@ -62,7 +71,11 @@ async def file_upload(reader):
             size += len(chunk)
             f.write(chunk)
     return 'ok'
+```
 
+更改host与port
+```python
+runapp(host=yourhost,port=yourport)
 ```
 ## demo
 [myblog](yulan.net.cn) 欢迎访问！！！  

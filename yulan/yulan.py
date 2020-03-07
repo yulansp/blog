@@ -195,18 +195,11 @@ def datetime_filter(t):
     return strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
 
 
-def runapp(jinja2=True,host='127.0.0.1',port = 5000,static=None,info=True):
-    """Run an app locally"""
-    if info:
-        logging.basicConfig(level=logging.INFO)
-    else:
-        logging.basicConfig(level=logging.WARNING)
+def runapp(host='127.0.0.1',port = 5000):
     app = web.Application(middlewares=middlewares)
     app.add_routes(routes)
-    if static:
-        add_static(app,static)
-    if jinja2:
-        init_jinja2(app, filters=dict(datetime=datetime_filter))
+    add_static(app)
+    init_jinja2(app, filters=dict(datetime=datetime_filter))
     web.run_app(app,host=host,port=port)
 
 
