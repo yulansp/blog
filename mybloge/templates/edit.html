@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>博客编写</title>
+    <script src="../static/md/showdown.min.js"></script>
+    <link rel="stylesheet" href="../static/md/github.css">
+    <link rel="stylesheet" href="../static/md/styles/atom-one-light.css">
+    <script src="../static/md/highlight.pack.js"></script>
+    <link rel="stylesheet" href="../static/index.css">
+    <script src="../static/vue.min.js"></script>
+    <script src="../static/index.js"></script>
+    <script src="../static/axios.min.js"></script>
+
+</head>
+
+<body>
+<div id="app">
+    <el-container>
+        <el-header>
+            <el-row>
+                <el-col :span="18">
+                    <el-input type="textarea" placeholder="标题" :autosize="{ maxRows: 1}" v-model="textarea1"
+                              style="font-size: 24px;color: black;font-weight: bold;font-family: PingFang SC;"></el-input>
+                </el-col>
+                <el-col :span="2" :offset="1">
+                    <el-select v-model="value" placeholder="分类">
+                        <el-option v-for="item in options" :key="item.value" :label="item.label"
+                                   :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-col>
+                <el-col :span="2" :offset="1">
+                    <el-button type="primary" @click="release()" v-loading="loading">发布文章</el-button>
+                </el-col>
+            </el-row>
+
+        </el-header>
+        <el-container>
+            <el-aside width="50%">
+                <el-upload
+                        action="./api/photo_upload"
+                        accept="image/png, image/jpeg,"
+                        name="photo_name"
+                        :before-upload="beforeAvatarUpload"
+                        :limit="1"
+                        :show-file-list="false"
+                        with-credentials
+                        :on-success="upload_success"
+                        :on-error="upload_error">
+                    <el-button type="primary" plain>插入图片</el-button>
+                </el-upload>
+                <el-input style="font-size: 18px;font-weight: bold;" type="textarea" :autosize="{ minRows: 20}"
+                          v-model="textarea2" id="md-area"
+                          onkeyup=mdSwitch()>
+                </el-input>
+            </el-aside>
+            <el-container width="50%">
+                <el-main>
+                    <div id="show-area" class="markdown-body"></div>
+                </el-main>
+            </el-container>
+        </el-container>
+    </el-container>
+</div>
+</body>
+<script>
+    hljs.highlightCode = function () {
+        let blocks = document.querySelectorAll('pre code ');
+        [].forEach.call(blocks, hljs.highlightBlock);
+    };
+</script>
+<script>
+    function mdSwitch() {
+        var mdValue = document.getElementById("md-area").value;
+        var converter = new showdown.Converter({tables: true});
+        var html = converter.makeHtml(mdValue);
+        document.getElementById("show-area").innerHTML = html;
+        hljs.highlightCode()
+    }
+</script>
+<script>
+    var Main = {
+        data() {
+            return {
+                photo_name: '',
+                loading: false,
+                textarea1: '{% if blog %}{{ blog.name | safe }}{% endif %}',
+                textarea2: '{% if blog %}{{ blog.content | safe }}{% endif %}',
+                options: [{
+                    value: 'skill',
+                    label: '技术'
+                }, {
+                    value: 'read',
+                    label: '读书'
+                }, {
+                    value: 'something',
+                    label: '杂谈'
+                }],
+                value: '{% if blog %}{{ blog.classfication }}{% endif %}'
+            }
+        },
+        mounted: function () {
+            mdSwitch()
+        },
+        methods: {
+            beforeAvatarUpload(file) {
+                console.log(file)
+                console.log(file.name)
+                const isJPG = file.type === 'image/jpeg';
+                const isPNG = file.type === 'image/png';
+
+                if (!isJPG && !isPNG) {
+                    this.$message.error('上传头像图片只能是 JPG或PNG 格式!');
+                }
+                return isJPG || isPNG;
+            },
+            upload_success(response, file, fileList) {
+                this.textarea2 = this.textarea2 + '  \n![](' + response + ')'
+            },
+            upload_error(err, file, fileList) {
+                console.log(err)
+            },
+            release: function () {
+                this.loading = true
+                axios.post('/api/release', {
+                    name: this.textarea1,
+                    content: this.textarea2,
+                    content_html: document.getElementById("show-area").innerHTML,
+                    classfication: this.value
+                }).then(response => {
+                    this.loading = false
+                    if (response.data == '') {
+                        this.$notify({
+                            title: 'success',
+                            message: '发布成功，即将跳转',
+                            type: 'success',
+                            offset: 100
+                        })
+                        setTimeout(() => {
+                            location.href = '/admin'
+                        }, 1000)
+                    } else {
+                        this.$notify({
+                            title: 'warning',
+                            message: response.data.message,
+                            type: 'warning',
+                            offset: 100
+                        })
+                    }
+                }).catch(error => {
+                    this.loading = false
+                    this.$notify.error({
+                        title: 'wrong',
+                        message: '似乎出现的一点问题...重试一下吧',
+                        offset: 100
+                    })
+                })
+            }
+        }
+    }
+    var Ctor = Vue.extend(Main)
+    new Ctor().$mount('#app')
+</script>
+
+</html>
