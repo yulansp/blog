@@ -4,8 +4,8 @@ configs = {
         'host': '127.0.0.1',
         'port': 3306,
         'user': 'root',
-        'password': '@wht990125',
-        'db': 'yulan_blog'
+        'password': '***',
+        'db': 'dename'
     },
     'rds': {
         'host': '127.0.0.1',
@@ -16,6 +16,6 @@ configs = {
         'port':8000
     },
     'session': {
-        'secret': 'shiqingbo'
+        'secret': '***'
     }
 }
